@@ -1,6 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Path, Query
+
+# pylint: disable=import-error
 from src.controller.user.schema.post_user import (
     PostUserRequestBody,
     PostUserResponseBody,

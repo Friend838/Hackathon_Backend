@@ -1,6 +1,8 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
+
+# pylint: disable=import-error
 from src.config.config import Settings
 from src.controller.user.endpoint import user_router
 from src.dependencies.settings import get_settings

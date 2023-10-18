@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from dateutil import tz
+
+# pylint: disable=import-error
 from src.controller.user.schema.post_user import (
     PostUserRequestBody,
     PostUserResponseBody,

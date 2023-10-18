@@ -2,7 +2,9 @@ from typing import Any
 
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from pymongo.results import DeleteResult, InsertOneResult
+from pymongo.results import DeleteResult
+
+# pylint: disable=import-error
 from src.dependencies.settings import get_settings
 
 
