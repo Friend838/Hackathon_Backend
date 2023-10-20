@@ -4,11 +4,11 @@ from fastapi import Depends, FastAPI
 
 # pylint: disable=import-error
 from src.config.config import Settings
-from src.controller.user.endpoint import user_router
+from src.controller.employee.endpoint import employee_router
 from src.dependencies.settings import get_settings
 
 app = FastAPI()
-app.include_router(user_router)
+app.include_router(employee_router)
 
 
 @app.get("/")
