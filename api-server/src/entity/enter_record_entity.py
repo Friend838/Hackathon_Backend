@@ -1,11 +1,6 @@
 from datetime import datetime
-from enum import Enum
 
-
-class Danger(Enum):
-    type_0: "正常"
-    type_1: "警告"
-    type_2: "危險"
+from dateutil import tz
 
 
 class EnterRecord:
@@ -20,7 +15,12 @@ class EnterRecord:
         self.danger: str
 
         for k, v in item.items():
+            if k == "enter_time":
+                setattr(self, k, datetime.fromtimestamp(v, tz=tz.gettz("Asia/Taipei")))
+                continue
             setattr(self, k, v)
 
     def to_dict(self) -> dict:
-        return vars(self)
+        item = vars(self)
+        item["enter_time"] = int(item["enter_time"].timestamp())
+        return item
