@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # pylint: disable=import-error
 from src.config.config import Settings
+from src.controller.common.endpoint import common_router
 from src.controller.employee.endpoint import employee_router
 from src.controller.enter_record.endpoint import enter_record_router
 from src.controller.machine_record.endpoint import machine_record_router
@@ -27,6 +28,7 @@ app.include_router(employee_router)
 app.include_router(enter_record_router)
 app.include_router(machine_record_router)
 app.include_router(weekly_report_router)
+app.include_router(common_router)
 
 
 @app.get("/")
