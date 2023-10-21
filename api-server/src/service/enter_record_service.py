@@ -26,12 +26,6 @@ class EnterRecordService:
     def process_enter_record(self, body: PostEnterRecordRequestBody):
         enter_record_entity = EnterRecord(body.model_dump())
 
-        enter_record_entity.labeled_img = "TBA"
-        enter_record_entity.target = "TBA"
-        enter_record_entity.confidence = "TBA"
-        enter_record_entity.position = "TBA"
-        enter_record_entity.danger = "TBA"
-
         return PostEnterRecordResponseBody(
             **self.repo.post_enter_record(enter_record_entity)
         )
