@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Query
 from typing import Annotated
+
+from fastapi import APIRouter, Query
 
 # pylint: disable=import-error
 from src.controller.machine_record.schema.post_machine_record import (
@@ -32,7 +33,7 @@ def generate_machine_record(
     response_model=list[QueryMachineRecord],
 )
 def query_machine_record(
-    start_timestamp: Annotated[int, Query(gt=0, example=None)],
-    end_timestamp: Annotated[int, Query(gt=0, example=None)],
+    start_timestamp: Annotated[int, Query(example=1694361600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
 ):
     return service.get_machine_record(start_timestamp, end_timestamp)

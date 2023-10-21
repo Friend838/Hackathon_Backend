@@ -36,11 +36,11 @@ def generate_enter_record(
 
 @enter_record_router.get(
     path="/",
-    response_model=QueryEnterRecord,
+    response_model=list[QueryEnterRecord],
 )
 def get_enter_record(
-    start_timestamp: Annotated[int, Query(example=0)],
-    end_timestamp: Annotated[int, Query(example=0)],
+    start_timestamp: Annotated[int, Query(example=1695225600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
 ):
     return service.query_enter_record(start_timestamp, end_timestamp)
 
@@ -49,18 +49,18 @@ def get_enter_record(
     path="/totalLateDistributed", response_model=QueryTotalLateDistribution
 )
 def get_total_late_distributed(
-    start_timestamp: Annotated[int, Query(example=0)],
-    end_timestamp: Annotated[int, Query(example=0)],
+    start_timestamp: Annotated[int, Query(example=1695225600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
 ):
     return service.query_total_late_status(start_timestamp, end_timestamp)
 
 
 @enter_record_router.get(
     path="/departmentLateDistributed",
-    response_model=QueryLateDistribution,
+    response_model=list[QueryLateDistribution],
 )
 def get_department_late_distributed(
-    start_timestamp: Annotated[int, Query(example=0)],
-    end_timestamp: Annotated[int, Query(example=0)],
+    start_timestamp: Annotated[int, Query(example=1695225600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
 ):
-    return service.query_department_late_status(start_timestamp, end_timestamp)
+    return service.query_department_late_distribution(start_timestamp, end_timestamp)

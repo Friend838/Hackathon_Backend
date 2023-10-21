@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
@@ -44,12 +44,14 @@ class EnterRecordService:
             employee_entity = self.employee_service.read_employee(
                 employee_id=entity.employee_id
             )
-            shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
+            shift_time = datetime.strptime(employee_entity.shift_time, "%H:%M").time()
 
             if shift_time < entity.enter_time.time():
                 status = "late"
             elif (
-                shift_time - timedelta(minutes=20)
+                (
+                    datetime.combine(date.today(), shift_time) - timedelta(minutes=20)
+                ).time()
                 <= entity.enter_time.time()
                 <= shift_time
             ):
@@ -61,10 +63,13 @@ class EnterRecordService:
                 QueryEnterRecord(
                     employee_id=employee_entity.employee_id,
                     zone=employee_entity.zone,
+                    department=employee_entity.department,
                     shift_time=employee_entity.shift_time,
                     status=status,
                 )
             )
+
+        return result_list
 
     def query_total_late_status(self, start_timestamp: int, end_timestamp: int):
         entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
@@ -74,12 +79,14 @@ class EnterRecordService:
             employee_entity = self.employee_service.read_employee(
                 employee_id=entity.employee_id
             )
-            shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
+            shift_time = datetime.strptime(employee_entity.shift_time, "%H:%M").time()
 
             if shift_time < entity.enter_time.time():
                 result_dict["late"] += 1
             elif (
-                shift_time - timedelta(minutes=20)
+                (
+                    datetime.combine(date.today(), shift_time) - timedelta(minutes=20)
+                ).time()
                 <= entity.enter_time.time()
                 <= shift_time
             ):
@@ -113,19 +120,21 @@ class EnterRecordService:
                     "late": 0,
                 }
 
-            shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
+            shift_time = datetime.strptime(employee_entity.shift_time, "%H:%M").time()
 
             if shift_time < entity.enter_time.time():
                 department_in_zone[employee_entity.zone][employee_entity.department][
                     "late"
                 ] += 1
             elif (
-                shift_time - timedelta(minutes=20)
+                (
+                    datetime.combine(date.today(), shift_time) - timedelta(minutes=20)
+                ).time()
                 <= entity.enter_time.time()
                 <= shift_time
             ):
                 department_in_zone[employee_entity.zone][employee_entity.department][
-                    "on_time"
+                    "on-time"
                 ] += 1
             else:
                 department_in_zone[employee_entity.zone][employee_entity.department][

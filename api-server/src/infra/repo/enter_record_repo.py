@@ -18,7 +18,7 @@ class EnterRecordRepo:
     ) -> list[EnterRecord]:
         query_result = self.db.find(
             self.collection_name,
-            {"timestamp": {"$gte": start_timestamp, "$lte": end_timestamp}},
+            {"enter_time": {"$gte": start_timestamp, "$lte": end_timestamp}},
         )
 
         return [EnterRecord(item) for item in query_result]
