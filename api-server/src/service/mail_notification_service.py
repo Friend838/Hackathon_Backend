@@ -7,28 +7,30 @@
 # from src.entity.machine_record_entity import MachineRecord
 # from src.infra.repo.machine_record_repo import MachineRecordRepo
 
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from typing import List
-from src.dependencies.settings import get_settings
+
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from src.controller.mail_notification.schema.mail_notification import (
     MailNotificationRequestBody,
     MailNotificationResponseBody,
 )
+from src.dependencies.settings import get_settings
+
 
 class MailNotificationService:
     def __init__(self):
         setting = get_settings()
         self.conf = ConnectionConfig(
-            MAIL_USERNAME = setting.mail_username,
-            MAIL_PASSWORD = setting.mail_password,
-            MAIL_FROM = setting.mail_from,
-            MAIL_PORT = 587,
-            MAIL_SERVER = setting.mail_server,
+            MAIL_USERNAME=setting.mail_username,
+            MAIL_PASSWORD=setting.mail_password,
+            MAIL_FROM=setting.mail_from,
+            MAIL_PORT=587,
+            MAIL_SERVER=setting.mail_server,
             MAIL_FROM_NAME=setting.mail_from_name,
-            MAIL_STARTTLS = True,
-            MAIL_SSL_TLS = False,
-            USE_CREDENTIALS = True,
-            VALIDATE_CERTS = True
+            MAIL_STARTTLS=True,
+            MAIL_SSL_TLS=False,
+            USE_CREDENTIALS=True,
+            VALIDATE_CERTS=True,
         )
 
     async def simple_send(self, body: MailNotificationRequestBody) -> str:
@@ -38,8 +40,9 @@ class MailNotificationService:
             subject=body.email_title,
             recipients=[body.email_to],
             body=body.email_body,
-            subtype='html')
+            subtype="html",
+        )
         print(message)
         fm = FastMail(self.conf)
         await fm.send_message(message)
-        return 'success'
+        return "success"

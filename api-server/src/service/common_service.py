@@ -5,9 +5,13 @@ from src.controller.enter_record.schema.post_enter_record import (
 from src.controller.machine_record.schema.post_machine_record import (
     PostMachineRecordRequestBody,
 )
+from src.controller.mail_notification.schema.mail_notification import (
+    MailNotificationRequestBody,
+)
 from src.dependencies.yolov7.class_detect import tsmc_model
 from src.service.enter_record_service import EnterRecordService
 from src.service.machine_record_service import MachineRecordService
+from src.service.mail_notification_service import MailNotificationService
 
 
 class Common:
@@ -15,6 +19,7 @@ class Common:
         self.model_predictor = tsmc_model()
         self.enter_record_service = EnterRecordService()
         self.machine_record_service = MachineRecordService()
+        self.mail_notification_service = MailNotificationService()
 
     def model_inference(self, image_path: str) -> str:
         results = self.model_predictor.detect(image_path)
@@ -36,7 +41,7 @@ class Common:
 
         return processed_img_path, {"inference_result": results, "status": status}
 
-    def generate_record(
+    async def generate_record(
         self,
         image_path: str,
         employee_id: str,
@@ -55,6 +60,29 @@ class Common:
             status = 1
         else:
             status = 0
+
+        if status == 1:
+            await self.mail_notification_service.simple_send(
+                MailNotificationRequestBody(
+                    email_to="azsx9015223@gmail.com",
+                    email_title="Warning: Your employee has violated the principle of PIP",
+                    email_body="""
+                    To inform you that your subordinate brought something not allowed in the company. Please contact with him or she.
+                    """,
+                )
+            )
+            print("send warning mail")
+        elif status == 2:
+            await self.mail_notification_service.simple_send(
+                MailNotificationRequestBody(
+                    email_to="azsx9015223@gmail.com",
+                    email_title="Urgent Alert: Your employee has the potential attack behavior",
+                    email_body="""
+                    To warn you that your subordinate brought something might hurt someone else. We have detained him or she for now. Please come to security room.
+                    """,
+                )
+            )
+            print("send danger mail")
 
         img_name = image_path.split("/")[-1]
         origin_img_path = f"../images/origin/{img_name}"

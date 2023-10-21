@@ -40,7 +40,7 @@ def inference_image(
     path="/generateRecord",
     response_model=PostGenerateRecord,
 )
-def generate_record(
+async def generate_record(
     img_file: Annotated[UploadFile, File()],
     employee_id: Annotated[str, Form()],
     zone: Annotated[str, Form()],
@@ -57,7 +57,7 @@ def generate_record(
     with open(file_path, "wb+") as file_object:
         shutil.copyfileobj(img_file.file, file_object)
 
-    service.generate_record(
+    await service.generate_record(
         image_path=file_path,
         employee_id=employee_id,
         zone=zone,

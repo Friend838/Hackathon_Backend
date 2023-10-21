@@ -1,7 +1,9 @@
-import openai
 from datetime import datetime
+
+import openai
 from dateutil import tz
 
+# pylint: disable=import-error
 from src.controller.analysis_server.schema.post_chat_msg import (
     PostChatMsgRequestBody,
     PostChatMsgResponseBody,
@@ -10,12 +12,13 @@ from src.controller.analysis_server.schema.post_report_msg import (
     PostReportMsgRequestBody,
     PostReportMsgResponseBody,
 )
-from src.service.enter_record_service import EnterRecordService
-from src.infra.repo.analysis_server_repo import AnalysisServerRepo
 from src.dependencies.settings import get_settings
 from src.entity.employee_entity import Employee
 from src.entity.enter_record_entity import EnterRecord
 from src.entity.machine_record_entity import MachineRecord
+from src.infra.repo.analysis_server_repo import AnalysisServerRepo
+from src.service.enter_record_service import EnterRecordService
+
 
 class AnalysisServerService:
     def __init__(self) -> None:
@@ -33,41 +36,43 @@ class AnalysisServerService:
         self.dataFoundMsg = "The finding data is: "
         self.codeQueryMsg = "The code to get the data is: "
         self.dateDefinitionMsg = "If the answer is a date or a time, convert it from timestamp to the format MM/DD/YYYY hh:mm"
-        self.retUserMsg = "Please use the finding data to answer the following question in "
+        self.retUserMsg = (
+            "Please use the finding data to answer the following question in "
+        )
         # 由 totalLateDistributed 資料生成觀察跟結論
         self.reportQuestionMsg = "Briefly give me 3 observation from the following data"
         self.reportDataMsg = ""
         # 由 departmentLateDistributed 資料生成觀察跟結論
-        
+
     def gpt(self, messages):
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-16K",
             messages=messages,
             max_tokens=128,
             temperature=0.5,
-            n=1
+            n=1,
         )
         return completion.choices[0].message.content
-    
-    # chatting system 
+
+    # chatting system
     def chat_with_GPT(self, body: PostChatMsgRequestBody):
         question = body.message
         language = body.language
-        
+
         queryMsg = self.text2mongoQuery(question)
-        #queryMsg = 'data = AnalysisServerRepo().getData(\"EnterRecord\", {\"employee_id\": \"EMP001\"})\nX = data[0][\"enter_time\"]\nX'
-        #return PostChatMsgResponseBody(**{"message": queryMsg})
-        
+        # queryMsg = 'data = AnalysisServerRepo().getData(\"EnterRecord\", {\"employee_id\": \"EMP001\"})\nX = data[0][\"enter_time\"]\nX'
+        # return PostChatMsgResponseBody(**{"message": queryMsg})
+
         vars = {}
         try:
             exec(queryMsg, globals(), vars)
-            #return PostChatMsgResponseBody(**{"message": str(vars)})
+            # return PostChatMsgResponseBody(**{"message": str(vars)})
         except:
             return PostChatMsgResponseBody(**{"message": queryMsg + " exec() failed!"})
 
         ret = self.data2retMsg(question, language, vars, queryMsg)
         return PostChatMsgResponseBody(**{"message": ret})
-    
+
     def text2mongoQuery(self, question):
         messages = []
         messages.append({"role": "system", "content": self.userSchemaMsg})
@@ -78,8 +83,8 @@ class AnalysisServerService:
         messages.append({"role": "system", "content": self.codeExampleMsg})
         messages.append({"role": "system", "content": self.retQueryMsg})
         messages.append({"role": "user", "content": question})
-        #return str(messages)
-        
+        # return str(messages)
+
         ret = self.gpt(messages)
         return ret
 
@@ -91,15 +96,15 @@ class AnalysisServerService:
         messages.append({"role": "system", "content": self.retUserMsg + language})
         messages.append({"role": "user", "content": question})
         ret = self.gpt(messages)
-        
+
         return ret
-    
+
     def weekly_report_GPT(self, body: PostReportMsgRequestBody):
         reportType = body.type
         startTime = body.start_timestamp
         endTime = body.end_timestamp
         language = body.language
-        
+
         ret = {}
         title, content = "", []
         if reportType == "attendence":
@@ -109,30 +114,44 @@ class AnalysisServerService:
         ret["title"] = title
         ret["content"] = content
         ret["end_timestamp"] = endTime
-        
+
         return PostReportMsgResponseBody(**ret)
-    
+
     def timestamp2str(self, timestamp):
         date = datetime.fromtimestamp(timestamp, tz=tz.gettz("Asia/Taipei"))
         return date.strftime("%m/%d/%Y")
-    
+
     def attendence_report(self, startTime, endTime, language):
-        title = "Attendence Report: " + self.timestamp2str(startTime) + " ~ " + self.timestamp2str(endTime)
+        title = (
+            "Attendence Report: "
+            + self.timestamp2str(startTime)
+            + " ~ "
+            + self.timestamp2str(endTime)
+        )
         content = []
-        
+
         enterRecordService = EnterRecordService()
         totalLateDistribution = []
         departLateDistribution = []
         day = 86400
         for i in range((endTime - startTime) // day):
             s, e = startTime + day * i, endTime + day * i
-            totalLateDistribution.append(str(enterRecordService.query_total_late_status(s, e)))
-            departLateDistribution.append(enterRecordService.query_department_late_distribution(s, e))
+            totalLateDistribution.append(
+                str(enterRecordService.query_total_late_status(s, e))
+            )
+            departLateDistribution.append(
+                enterRecordService.query_department_late_distribution(s, e)
+            )
         content.append(str(totalLateDistribution))
         content.append(str(departLateDistribution))
         return title, content
-    
+
     def machine_report(self, startTime, endTime, language):
-        title = "Machine Report: " + self.timestamp2str(startTime) + " ~ " + self.timestamp2str(endTime)
+        title = (
+            "Machine Report: "
+            + self.timestamp2str(startTime)
+            + " ~ "
+            + self.timestamp2str(endTime)
+        )
         content = []
         return title, content
