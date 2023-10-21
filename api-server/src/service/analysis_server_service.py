@@ -148,7 +148,7 @@ class AnalysisServerService:
             )
             deptLateDistribution.append(
                 [
-                    x.asDict()
+                    x.model_dump()
                     for x in ers.query_department_late_distribution(
                         start_timestamp=s, end_timestamp=e
                     )
