@@ -3,7 +3,7 @@ from camel_converter.pydantic_base import CamelBase
 
 
 class PostEmployeeRequestBody(CamelBase):
-    employ_id: str
+    employee_id: str
     zone: str
     department: str
     shift_time: str
@@ -13,7 +13,7 @@ class PostEmployeeRequestBody(CamelBase):
             "examples": [
                 dict_to_camel(
                     {
-                        "employ_id": "EMP401",
+                        "employee_id": "EMP401",
                         "zone": "HQ",
                         "department": "DEPT1",
                         "shift_time": "7:30",

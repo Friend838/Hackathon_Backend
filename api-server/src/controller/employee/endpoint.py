@@ -24,7 +24,7 @@ service = EmployeeService()
 )
 def read_employee(
     employ_id: Annotated[
-        str, Path(example="EMP401", description="The ID of employ to get")
+        str, Path(example="EMP401", description="The ID of employee to get")
     ]
 ):
     return service.read_employee(employ_id)
