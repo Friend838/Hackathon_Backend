@@ -22,6 +22,9 @@ class DepartmentLateDistribution(CamelBase):
             ]
         }
     }
+    
+    def asDict(self):
+        return {"department": self.department, "late": self.the_number_of_late, "on_time": self.the_number_of_on_time, "early": self.the_number_of_early}
 
 
 class QueryLateDistribution(CamelBase):
@@ -53,3 +56,7 @@ class QueryLateDistribution(CamelBase):
             ]
         }
     }
+    
+    def asDict(self):
+        return {"zone": self.zone, "late_distribution": [self.late_distribution[0].asDict(), self.late_distribution[1].asDict()]}
+    
