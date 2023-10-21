@@ -1,6 +1,9 @@
 from datetime import date, datetime, timedelta
 
 from src.controller.enter_record.schema.get_danger_count import GetDangerCount
+from src.controller.enter_record.schema.get_detailed_danger_count import (
+    GetDetailedDangerCount,
+)
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
@@ -182,3 +185,23 @@ class EnterRecordService:
             warning=getDangerCount[1],
             danger=getDangerCount[2],
         )
+
+    def get_detailed_danger_count(self, start_timestamp: int, end_timestamp: int):
+        entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
+
+        count = {}
+        label_mapping = {
+            0: "electronic_device",
+            1: "laptop",
+            2: "scissor",
+            3: "knife",
+            4: "gun",
+        }
+        for entity in entity_list:
+            for label in entity.target:
+                if label_mapping[label] not in count:
+                    count[label_mapping[label]] = 1
+                else:
+                    count[label_mapping[label]] += 1
+
+        return GetDetailedDangerCount(**count)

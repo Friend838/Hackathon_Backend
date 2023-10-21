@@ -2,6 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 from src.controller.enter_record.schema.get_danger_count import GetDangerCount
+from src.controller.enter_record.schema.get_detailed_danger_count import (
+    GetDetailedDangerCount,
+)
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
@@ -81,3 +84,13 @@ def get_danger_count(
     danger: Knife or Gun found
     """
     return service.get_danger_count(start_timestamp, end_timestamp)
+
+
+@enter_record_router.get(
+    path="/getDetailedDangerCount", response_model=GetDetailedDangerCount
+)
+def get_detailed_danger_count(
+    start_timestamp: Annotated[int, Query(example=1695225600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
+):
+    return service.get_detailed_danger_count(start_timestamp, end_timestamp)
