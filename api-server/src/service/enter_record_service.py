@@ -1,5 +1,7 @@
 from datetime import date, datetime, timedelta
 
+from src.controller.enter_record.schema.get_danger_count import GetDangerCount
+
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
     PostEnterRecordRequestBody,
@@ -163,3 +165,20 @@ class EnterRecordService:
         ]
 
         return result
+
+    def get_danger_count(self, start_timestamp: int, end_timestamp: int):
+        entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
+        getDangerCount = [0, 0, 0]
+        for entity in entity_list:
+            if entity.danger == "Normal":
+                getDangerCount[0] += 1
+            elif entity.danger == "Warning":
+                getDangerCount[1] += 1
+            elif entity.danger == "Danger":
+                getDangerCount[2] += 1
+
+        return GetDangerCount(
+            normal=getDangerCount[0],
+            warning=getDangerCount[1],
+            danger=getDangerCount[2],
+        )

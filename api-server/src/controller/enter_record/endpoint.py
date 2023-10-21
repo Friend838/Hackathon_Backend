@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Query
+from src.controller.enter_record.schema.get_danger_count import GetDangerCount
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
@@ -64,3 +65,19 @@ def get_department_late_distributed(
     end_timestamp: Annotated[int, Query(example=1695312000)],
 ):
     return service.query_department_late_distribution(start_timestamp, end_timestamp)
+
+
+@enter_record_router.get(
+    path="/getDangerCount",
+    response_model=GetDangerCount,
+)
+def get_danger_count(
+    start_timestamp: Annotated[int, Query(example=1695225600)],
+    end_timestamp: Annotated[int, Query(example=1695312000)],
+):
+    """
+    normal: No abnormal item found
+    warning: Electronic device or Notebook found
+    danger: Knife or Gun found
+    """
+    return service.get_danger_count(start_timestamp, end_timestamp)
