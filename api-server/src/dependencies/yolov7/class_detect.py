@@ -50,8 +50,8 @@ class tsmc_model:
         self.project = "../images/labeled"
         self.name = "exp"
         self.exist_ok = False
-        self.no_trace = False
-        self.trace = True
+        self.no_trace = True
+        self.trace = False
 
         # Model
         # Initialize
