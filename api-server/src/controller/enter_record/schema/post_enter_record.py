@@ -5,7 +5,6 @@ from camel_converter.pydantic_base import CamelBase
 class PostEnterRecordRequestBody(CamelBase):
     employee_id: str
     enter_time: int
-    origin_img: str
 
     model_config = {
         "json_schema_extra": {
@@ -14,7 +13,6 @@ class PostEnterRecordRequestBody(CamelBase):
                     {
                         "employee_id": "EMP017",
                         "enter_time": 1694387640,
-                        "origin_img": "/home/user/shot_imgs",
                     }
                 )
             ]

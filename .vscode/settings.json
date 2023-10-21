@@ -1,0 +1,15 @@
+{
+    "python.defaultInterpreterPath": "/home/hackthon/anaconda3/envs/backend/bin/python",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+    },
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "python.languageServer": "Pylance",
+}

@@ -14,9 +14,6 @@ class EnterRecordService:
     def process_enter_record(self, body: PostEnterRecordRequestBody):
         enter_record_entity = EnterRecord(body.model_dump())
 
-        # model inference
-        # return labeled_img, target, confidence, position, danger
-
         enter_record_entity.labeled_img = "TBA"
         enter_record_entity.target = "TBA"
         enter_record_entity.confidence = "TBA"
