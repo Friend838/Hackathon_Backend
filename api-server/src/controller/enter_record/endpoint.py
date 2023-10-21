@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path
+from fastapi import APIRouter
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
