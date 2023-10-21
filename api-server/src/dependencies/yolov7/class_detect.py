@@ -38,7 +38,7 @@ class tsmc_model:
         self.imgsz = 1280
         self.conf_thres = 0.25
         self.iou_thres = 0.45
-        self.device = ""
+        self.device = "cpu"
         self.view_img = False
         self.save_txt = False
         self.save_conf = True
