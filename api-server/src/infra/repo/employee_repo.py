@@ -8,8 +8,8 @@ class EmployeeRepo:
         self.db = MongoDB()
         self.collection_name = "Employee"
 
-    def read_employee(self, employ_id: str):
-        document = {"employ_id": employ_id}
+    def read_employee(self, employee_id: str):
+        document = {"employee_id": employee_id}
         result = self.db.find(self.collection_name, document)
 
         return Employee(result[0])

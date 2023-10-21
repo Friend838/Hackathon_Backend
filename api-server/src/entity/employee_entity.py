@@ -1,6 +1,6 @@
 class Employee:
     def __init__(self, item: dict) -> None:
-        self.employ_id: str
+        self.employee_id: str
         self.zone: str
         self.department: str
         self.shift_time: str

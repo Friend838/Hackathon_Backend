@@ -42,7 +42,7 @@ class EnterRecordService:
         result_list = []
         for entity in entity_list:
             employee_entity = self.employee_service.read_employee(
-                employ_id=entity.employ_id
+                employee_id=entity.employee_id
             )
             shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
 
@@ -59,7 +59,7 @@ class EnterRecordService:
 
             result_list.append(
                 QueryEnterRecord(
-                    employee_id=employee_entity.employ_id,
+                    employee_id=employee_entity.employee_id,
                     zone=employee_entity.zone,
                     shift_time=employee_entity.shift_time,
                     status=status,
@@ -72,7 +72,7 @@ class EnterRecordService:
         result_dict = {"late": 0, "on-time": 0, "early": 0}
         for entity in entity_list:
             employee_entity = self.employee_service.read_employee(
-                employ_id=entity.employ_id
+                employee_id=entity.employee_id
             )
             shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
 
@@ -101,7 +101,7 @@ class EnterRecordService:
 
         for entity in entity_list:
             employee_entity = self.employee_service.read_employee(
-                employ_id=entity.employ_id
+                employee_id=entity.employee_id
             )
             if (
                 employee_entity.department

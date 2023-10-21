@@ -12,8 +12,8 @@ class EmployeeService:
     def __init__(self) -> None:
         self.repo = EmployeeRepo()
 
-    def read_employee(self, employ_id: str):
-        employee_entity = self.repo.read_employee(employ_id)
+    def read_employee(self, employee_id: str):
+        employee_entity = self.repo.read_employee(employee_id)
         return QueryEmployee(**employee_entity.to_dict())
 
     def create_employee(self, body: PostEmployeeRequestBody):

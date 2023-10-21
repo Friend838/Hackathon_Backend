@@ -5,7 +5,7 @@ from dateutil import tz
 
 class EnterRecord:
     def __init__(self, item: dict) -> None:
-        self.employ_id: str
+        self.employee_id: str
         self.enter_time: datetime
         self.origin_img: str
         self.labeled_img: str

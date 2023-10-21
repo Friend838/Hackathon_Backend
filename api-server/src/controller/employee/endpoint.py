@@ -19,15 +19,15 @@ service = EmployeeService()
 
 
 @employee_router.get(
-    "/{employ_id}",
+    "/{employee_id}",
     response_model=QueryEmployee,
 )
 def read_employee(
-    employ_id: Annotated[
+    employee_id: Annotated[
         str, Path(example="EMP401", description="The ID of employee to get")
     ]
 ):
-    return service.read_employee(employ_id)
+    return service.read_employee(employee_id)
 
 
 @employee_router.post(
