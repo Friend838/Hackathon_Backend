@@ -8,6 +8,9 @@ from src.controller.employee.schema.post_employee import (
     PostEmployeeResponseBody,
 )
 from src.controller.employee.schema.query_employee import QueryEmployee
+from src.controller.employee.schema.query_employee_distribution import (
+    QueryEmployeeDistribution,
+)
 from src.service.employee_service import EmployeeService
 
 employee_router = APIRouter(
@@ -17,6 +20,13 @@ employee_router = APIRouter(
 
 service = EmployeeService()
 
+
+@employee_router.get(
+    path = "/distribution",
+    response_model=list[QueryEmployeeDistribution]
+)
+def get_distribution():
+    return service.get_distribution()
 
 @employee_router.get(
     "/{employee_id}",
