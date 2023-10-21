@@ -15,7 +15,7 @@ class PostReportMsgRequestBody(CamelBase):
                         "start_timestamp": 1694534400,
                         "end_timestamp": 1695139200,
                         "language": "English",
-                        "type": "attandence or machine"
+                        "type": "attendance or machine"
                     }
                 )
             ]

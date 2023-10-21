@@ -35,15 +35,25 @@ class AnalysisServerService:
         self.dataFoundMsg = "The finding data is: "
         self.codeQueryMsg = "The code to get the data is: "
         self.dateDefinitionMsg = "If the answer is a date or a time, convert it from timestamp to the format MM/DD/YYYY hh:mm"
-        self.retUserMsg = "Please use the finding data to answer the following question in "
-        
-        # 由 totalLateDistributed 資料生成觀察跟結論
+        self.retUserMsg = (
+            "Please use the finding data to answer the following question in "
+        )
+
+        # 由遲到分布資料生成觀察跟結論
         self.reportQuestionMsg = "List 3 observation from the following data with explanation and comparison briefly. All in {0}"
         self.reportTotalLateDataMsg = "The data shows the distribution of late, on time and early employee from {0} to {1}"
         self.reportDeptLateDataMsg = "The data shows the distribution of late, on time and early employee of each department from {0} to {1}"
-        self.reportAttedenceConclusionMsg = "Draw a summary of the informations as the ending of the report. All in {0}"
-        
-        # 由 departmentLateDistributed 資料生成觀察跟結論
+        self.reportAttedenceConclusionMsg = (
+            "Draw a summary of the informations as the ending of the report. All in {0}"
+        )
+
+        # 由掃描資料生成觀察跟結論
+        self.reportQuestionMsg = "List 3 observation from the following data with explanation and comparison briefly. All in {0}"
+        self.reportDangerLevelMsg = "The data shows the distribution of the normal, warning and danger status of employee's belongings from {0} to {1}"
+        self.reportDangerCountMsg = "The data shows the distribution of the identified contraband found in employee's belongings from {0} to {1}"
+        self.reportMachineConclusionMsg = (
+            "Draw a summary of the informations as the ending of the report. All in {0}"
+        )
         
     def gpt(self, messages):
         completion = openai.ChatCompletion.create(
@@ -134,11 +144,26 @@ class AnalysisServerService:
         day = 86400
         for i in range((endTime - startTime) // day):
             s, e = startTime + day * i, startTime + day * (i + 1)
-            totalLateDistribution.append(ers.query_total_late_status(start_timestamp=s, end_timestamp=e).asDict())
-            deptLateDistribution.append([x.asDict() for x in ers.query_department_late_distribution(start_timestamp=s, end_timestamp=e)])
-        
-        contents.append(self.totalLate2msg(totalLateDistribution, startTimeStr, endTimeStr, language))
-        contents.append(self.deptLate2msg(deptLateDistribution, startTimeStr, endTimeStr, language))
+            totalLateDistribution.append(
+                ers.query_total_late_status(start_timestamp=s, end_timestamp=e).model_dump()
+            )
+            deptLateDistribution.append(
+                [
+                    x.model_dump()
+                    for x in ers.query_department_late_distribution(
+                        start_timestamp=s, end_timestamp=e
+                    )
+                ]
+            )
+
+        contents.append(
+            self.totalLate2msg(
+                totalLateDistribution, startTimeStr, endTimeStr, language
+            )
+        )
+        contents.append(
+            self.deptLate2msg(deptLateDistribution, startTimeStr, endTimeStr, language)
+        )
         contents.append(self.attendanceConclusionMsg(contents, language))
 
         return title, contents
@@ -171,6 +196,83 @@ class AnalysisServerService:
         return ret
     
     def machine_report(self, startTime, endTime, language):
+        startTimeStr, endTimeStr = self.timestamp2str(startTime), self.timestamp2str(endTime)
         title = "Machine Report: " + self.timestamp2str(startTime) + " ~ " + self.timestamp2str(endTime)
-        content = []
-        return title, content
+        
+        contents = []
+
+        ers = EnterRecordService()
+
+        dangerLevelDistribution = []
+        dangerCountDistribution = []
+        day = 86400
+        for i in range((endTime - startTime) // day):
+            s, e = startTime + day * i, startTime + day * (i + 1)
+            dangerLevelDistribution.append(
+                ers.get_danger_count(start_timestamp=s, end_timestamp=e).model_dump()
+            )
+            dangerCountDistribution.append(
+                ers.get_detailed_danger_count(start_timestamp=s, end_timestamp=e).model_dump()
+            )
+
+        contents.append(
+            self.dangerLevel2msg(dangerLevelDistribution, startTimeStr, endTimeStr, language)
+        )
+        contents.append(
+            self.dangerCount2msg(dangerCountDistribution, startTimeStr, endTimeStr, language)
+        )
+        contents.append(self.machineConclusionMsg(contents, language))
+
+        return title, contents
+
+    def dangerLevel2msg(self, dangerLevelDistribution, startTime, endTime, language):
+        messages = []
+        messages.append(
+            {
+                "role": "system",
+                "content": self.reportDangerLevelMsg.format(startTime, endTime),
+            }
+        )
+        messages.append({"role": "system", "content": str(dangerLevelDistribution)})
+        messages.append(
+            {"role": "user", "content": self.reportQuestionMsg.format(language)}
+        )
+
+        ret = self.gpt(messages)
+        return ret
+    
+    def dangerCount2msg(self, dangerCountDistribution, startTime, endTime, language):
+        messages = []
+        messages.append(
+            {
+                "role": "system",
+                "content": self.reportDangerCountMsg.format(startTime, endTime),
+            }
+        )
+        messages.append({"role": "system", "content": str(dangerCountDistribution)})
+        messages.append(
+            {"role": "user", "content": self.reportQuestionMsg.format(language)}
+        )
+
+        ret = self.gpt(messages)
+        return ret
+    
+    def machineConclusionMsg(self, contents, language):
+        messages = []
+        for i in range(len(contents)):
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": "Information from chart {}: ".format(i + 1)
+                    + contents[i],
+                }
+            )
+        messages.append(
+            {
+                "role": "user",
+                "content": self.reportMachineConclusionMsg.format(language),
+            }
+        )
+
+        ret = self.gpt(messages)
+        return ret
