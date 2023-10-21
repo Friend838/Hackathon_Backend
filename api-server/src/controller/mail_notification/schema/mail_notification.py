@@ -2,28 +2,27 @@ from camel_converter import dict_to_camel
 from camel_converter.pydantic_base import CamelBase
 
 class MailNotificationRequestBody(CamelBase):
-    zone: str
-    tool_scan_time: float
-    timestamp: int
+    email_to: str
+    email_title: str
+    email_body: str
 
     model_config = {
         "json_schema_extra": {
             "examples": [
                 dict_to_camel(
                     {
-                        "zone": "HQ",
-                        "tool_scan_time": 0.06,
-                        "timestamp": 1670189220,
+                        "email_to": "example@example.com",
+                        "email_title": "Warning, dangerous item detected!",
+                        "email_body": "Warning, knife object detected!",
                     }
                 )
             ]
         }
     }
 
-
 class MailNotificationResponseBody(CamelBase):
-    mongo_object_id: str
+    status: str
 
     model_config = {
-        "json_schema_extra": {"examples": [{"mongo_object_id": "0x00000000000000000"}]}
+        "json_schema_extra": {"success"}
     }
