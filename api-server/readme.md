@@ -1,6 +1,7 @@
 # API server
 ## (Update: 2023/10/22)
 - Add "best.pt" into ~/api-server/src/dependencies/yolov7/models
+- Download: https://drive.google.com/file/d/160CeQBAQqA9QBBZDolG8jGr30Q2AQmCe/view?usp=sharing
 
 ## (Optional) Initialize a python virtual environment
 - Install virtualenv package if you don't have
