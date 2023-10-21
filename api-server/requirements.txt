@@ -3,6 +3,7 @@ camel-converter
 fastapi
 fastapi-mail
 ipython
+openai
 opencv-python
 pip-chill
 psutil
@@ -15,5 +16,4 @@ seaborn
 tensorboard
 thop
 torchvision
-tqdm
 uvicorn
