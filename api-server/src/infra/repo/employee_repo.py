@@ -18,3 +18,7 @@ class EmployeeRepo:
         payload = employee_entity.to_dict()
         object_id = self.db.insert_one_doc(self.collection_name, payload)
         return {"mongo_object_id": object_id}
+    
+    def read_all_employee(self):
+        result = self.db.find(self.collection_name, {})
+        return [Employee(item) for item in result]
