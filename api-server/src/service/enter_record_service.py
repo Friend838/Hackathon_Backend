@@ -6,7 +6,9 @@ from src.controller.enter_record.schema.post_enter_record import (
     PostEnterRecordResponseBody,
 )
 from src.controller.enter_record.schema.query_enter_record import QueryEnterRecord
-from src.controller.enter_record.schema.query_late_status import QueryLateStatus
+from src.controller.enter_record.schema.query_total_late_distribution import (
+    QueryTotalLateDistribution,
+)
 from src.entity.enter_record_entity import EnterRecord
 from src.infra.repo.enter_record_repo import EnterRecordRepo
 from src.service.employee_service import EmployeeService
@@ -67,7 +69,7 @@ class EnterRecordService:
             else:
                 result_dict["late"] += 1
 
-        return QueryLateStatus(
+        return QueryTotalLateDistribution(
             the_number_of_late=result_dict["late"],
             the_number_of_on_time=result_dict["on-time"],
         )

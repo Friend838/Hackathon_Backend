@@ -3,7 +3,7 @@ from camel_converter import dict_to_camel
 from camel_converter.pydantic_base import CamelBase
 
 
-class QueryLateStatus(CamelBase):
+class QueryTotalLateDistribution(CamelBase):
     the_number_of_late: int
     the_number_of_on_time: int
 
