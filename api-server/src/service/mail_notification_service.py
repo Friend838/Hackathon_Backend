@@ -10,6 +10,10 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from typing import List
 from src.dependencies.settings import get_settings
+from src.controller.mail_notification.schema.mail_notification import (
+    MailNotificationRequestBody,
+    MailNotificationResponseBody,
+)
 
 class MailNotificationService:
     def __init__(self):
@@ -27,13 +31,13 @@ class MailNotificationService:
             VALIDATE_CERTS = True
         )
 
-    async def simple_send(self, email: str) -> str:
+    async def simple_send(self, body: MailNotificationRequestBody) -> str:
         html = """<p>Hi this test mail, thanks for using Fastapi-mail</p> """
-        print(self.conf)
+        print(body)
         message = MessageSchema(
-            subject="Hello, Alvian",
-            recipients=[email],
-            body=html,
+            subject=body.email_title,
+            recipients=[body.email_to],
+            body=body.email_body,
             subtype='html')
         print(message)
         fm = FastMail(self.conf)
