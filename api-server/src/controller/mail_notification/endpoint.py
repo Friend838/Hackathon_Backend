@@ -12,6 +12,6 @@ service = MailNotificationService()
 mail_notification_router = APIRouter(prefix="/mailNotify", tags=["Mail notify"])
 
 @mail_notification_router.get(path="/")
-async def post_weekly_report():
+async def mail_notification():
     await service.simple_send("azsx9015223@gmail.com")
     return 'success'
