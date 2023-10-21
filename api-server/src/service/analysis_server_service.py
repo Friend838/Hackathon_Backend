@@ -21,6 +21,7 @@ class AnalysisServerService:
     def __init__(self) -> None:
         setting = get_settings()
         openai.api_key = setting.gpt_secret_key
+        
         # 由聊天問句生成資料庫 query
         self.userSchemaMsg = "Employee schema: " + Employee.brief()
         self.enterRecordSchemaMsg = "EnterRecord schema: " + EnterRecord.brief()
@@ -29,16 +30,19 @@ class AnalysisServerService:
         self.dataFunctionMsg = "Data function: AnalysisServerRepo().getData(collection, query), the function will find(query) in the db collection"
         self.codeExampleMsg = 'Code example: data = AnalysisServerRepo().getData("Employee", {"department": "HQ"}), X = len(data)'
         self.retQueryMsg = "Use the data function to answer the following question, and store the result in variable 'X'. Return python code only"
+        
         # 由 db 資料跟問句生成回答
         self.dataFoundMsg = "The finding data is: "
         self.codeQueryMsg = "The code to get the data is: "
         self.dateDefinitionMsg = "If the answer is a date or a time, convert it from timestamp to the format MM/DD/YYYY hh:mm"
         self.retUserMsg = "Please use the finding data to answer the following question in "
+        
         # 由 totalLateDistributed 資料生成觀察跟結論
         self.reportQuestionMsg = "List 3 observation from the following data with explanation and comparison briefly. All in {0}"
         self.reportTotalLateDataMsg = "The data shows the distribution of late, on time and early employee from {0} to {1}"
         self.reportDeptLateDataMsg = "The data shows the distribution of late, on time and early employee of each department from {0} to {1}"
         self.reportAttedenceConclusionMsg = "Draw a summary of the informations as the ending of the report. All in {0}"
+        
         # 由 departmentLateDistributed 資料生成觀察跟結論
         
     def gpt(self, messages):
@@ -104,8 +108,8 @@ class AnalysisServerService:
         
         ret = {}
         title, content = "", []
-        if reportType == "attendence":
-            title, content = self.attendence_report(startTime, endTime, language)
+        if reportType == "attendance":
+            title, content = self.attendance_report(startTime, endTime, language)
         elif reportType == "machine":
             title, content = self.machine_report(startTime, endTime, language)
         ret["title"] = title
@@ -118,9 +122,9 @@ class AnalysisServerService:
         date = datetime.fromtimestamp(timestamp, tz=tz.gettz("Asia/Taipei"))
         return date.strftime("%m/%d/%Y")
     
-    def attendence_report(self, startTime, endTime, language):
+    def attendance_report(self, startTime, endTime, language):
         startTimeStr, endTimeStr = self.timestamp2str(startTime), self.timestamp2str(endTime)
-        title = "Attendence Report: " + startTimeStr + " ~ " + endTimeStr
+        title = "Attendance Report: " + startTimeStr + " ~ " + endTimeStr
         contents = []
 
         ers = EnterRecordService()
@@ -135,7 +139,7 @@ class AnalysisServerService:
         
         contents.append(self.totalLate2msg(totalLateDistribution, startTimeStr, endTimeStr, language))
         contents.append(self.deptLate2msg(deptLateDistribution, startTimeStr, endTimeStr, language))
-        contents.append(self.attendenceConclusionMsg(contents, language))
+        contents.append(self.attendanceConclusionMsg(contents, language))
 
         return title, contents
     
@@ -157,7 +161,7 @@ class AnalysisServerService:
         ret = self.gpt(messages)
         return ret
     
-    def attendenceConclusionMsg(self, contents, language):
+    def attendanceConclusionMsg(self, contents, language):
         messages = []
         for i in range(len(contents)):
             messages.append({"role": "assistant", "content": "Information from chart {}: ".format(i+1) + contents[i]})
