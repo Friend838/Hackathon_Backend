@@ -14,6 +14,7 @@ from src.controller.enter_record.schema.query_late_distribution import (
 from src.controller.enter_record.schema.query_total_late_distribution import (
     QueryTotalLateDistribution,
 )
+from src.controller.enter_record.schema.get_danger_count import GetDangerCount
 from src.service.enter_record_service import EnterRecordService
 
 service = EnterRecordService()
@@ -63,4 +64,20 @@ def get_department_late_distributed(
     start_timestamp: Annotated[int, Query(example=0)],
     end_timestamp: Annotated[int, Query(example=0)],
 ):
-    return service.query_department_late_status(start_timestamp, end_timestamp)
+    return service.query_department_late_distribution(start_timestamp, end_timestamp)
+
+@enter_record_router.get(
+    path="/getDangerCount",
+    response_model=GetDangerCount,
+    
+)
+def get_enter_record(
+    start_timestamp: Annotated[int, Query(example=0)],
+    end_timestamp: Annotated[int, Query(example=0)],
+):
+    """
+    normal: No abnormal item found
+    warning: Electronic device or Notebook found
+    danger: Knife or Gun found
+    """
+    return service.get_danger_count(start_timestamp, end_timestamp)

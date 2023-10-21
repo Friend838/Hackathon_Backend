@@ -13,6 +13,7 @@ from src.controller.enter_record.schema.query_late_distribution import (
 from src.controller.enter_record.schema.query_total_late_distribution import (
     QueryTotalLateDistribution,
 )
+from src.controller.enter_record.schema.get_danger_count import GetDangerCount
 from src.entity.enter_record_entity import EnterRecord
 from src.infra.repo.enter_record_repo import EnterRecordRepo
 from src.service.employee_service import EmployeeService
@@ -160,3 +161,21 @@ class EnterRecordService:
         ]
 
         return result
+    
+    def get_danger_count(self, start_timestamp: int, end_timestamp: int):
+        entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
+        getDangerCount = [0, 0, 0]
+        print(entity_list)
+        for entity in entity_list:
+            if entity.danger == 'Normal':
+                getDangerCount[0] += 1
+            elif entity.danger == 'Warning':
+                getDangerCount[1] += 1
+            elif entity.danger == 'Danger':
+                getDangerCount[2] += 1
+
+        return GetDangerCount(
+            normal=getDangerCount[0],
+            warning=getDangerCount[1],
+            danger=getDangerCount[2]
+        )
