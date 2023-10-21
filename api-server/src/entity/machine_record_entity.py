@@ -23,3 +23,10 @@ class MachineRecord:
         item = vars(self)
         item["timestamp"] = int(item["timestamp"].timestamp())
         return item
+    
+    def brief() -> str:
+        return (
+            "zone: The zone of the machine, either \"HQ\" or \"AZ\" (String),\n"
+            "timestamp: The timestamp when the machine is scanning, for example 1694388540 (Number),\n"
+            "tool_scan_time: The duration of the machine scanning, for example 0.87 (Number)"
+        )

@@ -7,5 +7,6 @@ class Settings(BaseSettings):
     db_username: str
     db_password: str
     database: str
+    gpt_secret_key: str
 
     model_config = SettingsConfigDict(env_file=".env")
