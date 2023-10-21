@@ -8,6 +8,9 @@ from src.controller.enter_record.schema.post_enter_record import (
     PostEnterRecordResponseBody,
 )
 from src.controller.enter_record.schema.query_enter_record import QueryEnterRecord
+from src.controller.enter_record.schema.query_late_distribution import (
+    QueryLateDistribution,
+)
 from src.controller.enter_record.schema.query_total_late_distribution import (
     QueryTotalLateDistribution,
 )
@@ -50,3 +53,14 @@ def get_total_late_distributed(
     end_timestamp: Annotated[int, Query(example=0)],
 ):
     return service.query_total_late_status(start_timestamp, end_timestamp)
+
+
+@enter_record_router.get(
+    path="/departmentLateDistributed",
+    response_model=QueryLateDistribution,
+)
+def get_department_late_distributed(
+    start_timestamp: Annotated[int, Query(example=0)],
+    end_timestamp: Annotated[int, Query(example=0)],
+):
+    return service.query_department_late_status(start_timestamp, end_timestamp)

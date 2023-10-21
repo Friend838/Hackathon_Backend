@@ -6,6 +6,7 @@ from camel_converter.pydantic_base import CamelBase
 class QueryTotalLateDistribution(CamelBase):
     the_number_of_late: int
     the_number_of_on_time: int
+    the_number_of_early: int
 
     model_config = {
         "json_schema_extra": {
@@ -14,6 +15,7 @@ class QueryTotalLateDistribution(CamelBase):
                     {
                         "the_number_of_late": 1,
                         "the_number_of_on_time": 2,
+                        "the_number_of_early": 3,
                     }
                 )
             ]

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
@@ -6,6 +6,10 @@ from src.controller.enter_record.schema.post_enter_record import (
     PostEnterRecordResponseBody,
 )
 from src.controller.enter_record.schema.query_enter_record import QueryEnterRecord
+from src.controller.enter_record.schema.query_late_distribution import (
+    DepartmentLateDistribution,
+    QueryLateDistribution,
+)
 from src.controller.enter_record.schema.query_total_late_distribution import (
     QueryTotalLateDistribution,
 )
@@ -42,9 +46,16 @@ class EnterRecordService:
             )
             shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
 
-            status = "late"
-            if shift_time >= entity.enter_time.time():
+            if shift_time < entity.enter_time.time():
+                status = "late"
+            elif (
+                shift_time - timedelta(minutes=20)
+                <= entity.enter_time.time()
+                <= shift_time
+            ):
                 status = "on-time"
+            else:
+                status = "early"
 
             result_list.append(
                 QueryEnterRecord(
@@ -58,18 +69,94 @@ class EnterRecordService:
     def query_total_late_status(self, start_timestamp: int, end_timestamp: int):
         entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
 
-        result_dict = {"late": 0, "on-time": 0}
+        result_dict = {"late": 0, "on-time": 0, "early": 0}
         for entity in entity_list:
             employee_entity = self.employee_service.read_employee(
                 employ_id=entity.employ_id
             )
             shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
-            if shift_time >= entity.enter_time.time():
+
+            if shift_time < entity.enter_time.time():
+                result_dict["late"] += 1
+            elif (
+                shift_time - timedelta(minutes=20)
+                <= entity.enter_time.time()
+                <= shift_time
+            ):
                 result_dict["on-time"] += 1
             else:
-                result_dict["late"] += 1
+                result_dict["early"] += 1
 
         return QueryTotalLateDistribution(
             the_number_of_late=result_dict["late"],
             the_number_of_on_time=result_dict["on-time"],
+            the_number_of_early=result_dict["early"],
         )
+
+    def query_department_late_distribution(
+        self, start_timestamp: int, end_timestamp: int
+    ):
+        entity_list = self.repo.get_enter_record(start_timestamp, end_timestamp)
+        department_in_zone = {"HQ": {}, "AZ": {}}
+
+        for entity in entity_list:
+            employee_entity = self.employee_service.read_employee(
+                employ_id=entity.employ_id
+            )
+            if (
+                employee_entity.department
+                not in department_in_zone[employee_entity.zone]
+            ):
+                department_in_zone[employee_entity.zone][employee_entity.department] = {
+                    "early": 0,
+                    "on-time": 0,
+                    "late": 0,
+                }
+
+            shift_time = datetime.strptime("%H:%M", employee_entity.shift_time)
+
+            if shift_time < entity.enter_time.time():
+                department_in_zone[employee_entity.zone][employee_entity.department][
+                    "late"
+                ] += 1
+            elif (
+                shift_time - timedelta(minutes=20)
+                <= entity.enter_time.time()
+                <= shift_time
+            ):
+                department_in_zone[employee_entity.zone][employee_entity.department][
+                    "on_time"
+                ] += 1
+            else:
+                department_in_zone[employee_entity.zone][employee_entity.department][
+                    "early"
+                ] += 1
+
+        result = [
+            QueryLateDistribution(
+                zone="HQ",
+                late_distribution=[
+                    DepartmentLateDistribution(
+                        department=dept,
+                        the_number_of_late=department_in_zone["HQ"][dept]["late"],
+                        the_number_of_on_time=department_in_zone["HQ"][dept]["on-time"],
+                        the_number_of_early=department_in_zone["HQ"][dept]["early"],
+                    )
+                    for dept in department_in_zone["HQ"]
+                ],
+            ),
+            QueryLateDistribution(
+                zone="AZ",
+                late_distribution=[
+                    DepartmentLateDistribution(
+                        department=dept,
+                        the_number_of_late=department_in_zone["AZ"][dept]["late"],
+                        the_number_of_on_time=department_in_zone["AZ"][dept]["on-time"],
+                        the_number_of_early=department_in_zone["AZ"][dept]["early"],
+                    )
+                    for dept in department_in_zone["AZ"]
+                ],
+            ),
+        ]
+
+        return result
