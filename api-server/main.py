@@ -13,9 +13,7 @@ from src.dependencies.settings import get_settings
 
 app = FastAPI()
 
-origins = [
-    "*"
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
