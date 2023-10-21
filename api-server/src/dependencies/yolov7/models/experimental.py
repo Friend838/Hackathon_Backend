@@ -317,9 +317,7 @@ def attempt_load(weights, map_location=None):
     for w in weights if isinstance(weights, list) else [weights]:
         attempt_download(w)
         print(w)
-        sys.path.append(
-            "/home/hackthon/hackathon_backend/api-server/src/dependencies/yolov7/"
-        )
+        sys.path.append("./src/dependencies/yolov7/")
         ckpt = torch.load(w, map_location=map_location)  # load
         model.append(
             ckpt["ema" if ckpt.get("ema") else "model"].float().fuse().eval()
