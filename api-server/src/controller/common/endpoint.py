@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 from typing import Annotated
 
@@ -18,6 +19,12 @@ def inference_image(
 ):
     print(img_file.filename)
     file_path = f"../images/origin/{img_file.filename}"
+
+    if not os.path.isdir("../images/origin/"):
+        os.mkdir("../images/origin/")
+    if not os.path.isdir("../images/labeled/"):
+        os.mkdir("../images/labeled/")
+
     with open(file_path, "wb+") as file_object:
         shutil.copyfileobj(img_file.file, file_object)
 
