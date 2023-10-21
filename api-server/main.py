@@ -9,6 +9,7 @@ from src.controller.common.endpoint import common_router
 from src.controller.employee.endpoint import employee_router
 from src.controller.enter_record.endpoint import enter_record_router
 from src.controller.machine_record.endpoint import machine_record_router
+from src.controller.mail_notification.endpoint import mail_notification_router
 from src.controller.weekly_report.endpoint import weekly_report_router
 from src.dependencies.settings import get_settings
 
@@ -29,6 +30,7 @@ app.include_router(enter_record_router)
 app.include_router(machine_record_router)
 app.include_router(weekly_report_router)
 app.include_router(common_router)
+app.include_router(mail_notification_router)
 
 
 @app.get("/")

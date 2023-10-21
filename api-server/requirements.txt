@@ -1,11 +1,11 @@
 black
 camel-converter
 fastapi
+fastapi-mail
 ipython
 opencv-python
 pip-chill
 psutil
-pydantic-settings
 pylint
 pymongo
 python-multipart

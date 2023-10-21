@@ -34,7 +34,7 @@ from .utils.torch_utils import (
 class tsmc_model:
     def __init__(self) -> None:
         # Arguments
-        self.weights = "/home/hackthon/hackathon_backend/api-server/src/dependencies/yolov7/models/best.pt"
+        self.weights = "./src/dependencies/yolov7/models/best.pt"
         self.imgsz = 1280
         self.conf_thres = 0.25
         self.iou_thres = 0.45
