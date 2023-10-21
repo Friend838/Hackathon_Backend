@@ -35,15 +35,17 @@ class AnalysisServerService:
         self.dateDefinitionMsg = "If the answer is a date or a time, convert it from timestamp to the format MM/DD/YYYY hh:mm"
         self.retUserMsg = "Please use the finding data to answer the following question in "
         # 由 totalLateDistributed 資料生成觀察跟結論
-        self.reportQuestionMsg = "Briefly give me 3 observation from the following data"
-        self.reportDataMsg = ""
+        self.reportQuestionMsg = "List 3 observation from the following data with explanation and comparison briefly. All in {0}"
+        self.reportTotalLateDataMsg = "The data shows the distribution of late, on time and early employee from {0} to {1}"
+        self.reportDeptLateDataMsg = "The data shows the distribution of late, on time and early employee of each department from {0} to {1}"
+        self.reportAttedenceConclusionMsg = "Draw a summary of the informations as the ending of the report. All in {0}"
         # 由 departmentLateDistributed 資料生成觀察跟結論
         
     def gpt(self, messages):
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-16k",
             messages=messages,
-            max_tokens=128,
+            max_tokens=512,
             temperature=0.5,
             n=1
         )
@@ -117,20 +119,52 @@ class AnalysisServerService:
         return date.strftime("%m/%d/%Y")
     
     def attendence_report(self, startTime, endTime, language):
-        title = "Attendence Report: " + self.timestamp2str(startTime) + " ~ " + self.timestamp2str(endTime)
-        content = []
+        startTimeStr, endTimeStr = self.timestamp2str(startTime), self.timestamp2str(endTime)
+        title = "Attendence Report: " + startTimeStr + " ~ " + endTimeStr
+        contents = []
+
+        ers = EnterRecordService()
         
-        enterRecordService = EnterRecordService()
         totalLateDistribution = []
-        departLateDistribution = []
+        deptLateDistribution = []
         day = 86400
         for i in range((endTime - startTime) // day):
-            s, e = startTime + day * i, endTime + day * i
-            totalLateDistribution.append(str(enterRecordService.query_total_late_status(s, e)))
-            departLateDistribution.append(enterRecordService.query_department_late_distribution(s, e))
-        content.append(str(totalLateDistribution))
-        content.append(str(departLateDistribution))
-        return title, content
+            s, e = startTime + day * i, startTime + day * (i + 1)
+            totalLateDistribution.append(ers.query_total_late_status(start_timestamp=s, end_timestamp=e).asDict())
+            deptLateDistribution.append([x.asDict() for x in ers.query_department_late_distribution(start_timestamp=s, end_timestamp=e)])
+        
+        contents.append(self.totalLate2msg(totalLateDistribution, startTimeStr, endTimeStr, language))
+        contents.append(self.deptLate2msg(deptLateDistribution, startTimeStr, endTimeStr, language))
+        contents.append(self.attendenceConclusionMsg(contents, language))
+
+        return title, contents
+    
+    def totalLate2msg(self, totalLateDistribution, startTime, endTime, language):
+        messages = []
+        messages.append({"role": "system", "content": self.reportTotalLateDataMsg.format(startTime, endTime)})
+        messages.append({"role": "system", "content": str(totalLateDistribution)})
+        messages.append({"role": "user", "content": self.reportQuestionMsg.format(language)})
+    
+        ret = self.gpt(messages)
+        return ret
+    
+    def deptLate2msg(self, deptLateDistribution, startTime, endTime, language):
+        messages = []
+        messages.append({"role": "system", "content": self.reportDeptLateDataMsg.format(startTime, endTime)})
+        messages.append({"role": "system", "content": str(deptLateDistribution)})
+        messages.append({"role": "user", "content": self.reportQuestionMsg.format(language)})
+    
+        ret = self.gpt(messages)
+        return ret
+    
+    def attendenceConclusionMsg(self, contents, language):
+        messages = []
+        for i in range(len(contents)):
+            messages.append({"role": "assistant", "content": "Information from chart {}: ".format(i+1) + contents[i]})
+        messages.append({"role": "user", "content": self.reportAttedenceConclusionMsg.format(language)})
+        
+        ret = self.gpt(messages)
+        return ret
     
     def machine_report(self, startTime, endTime, language):
         title = "Machine Report: " + self.timestamp2str(startTime) + " ~ " + self.timestamp2str(endTime)

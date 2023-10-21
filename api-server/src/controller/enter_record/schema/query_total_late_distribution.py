@@ -21,3 +21,6 @@ class QueryTotalLateDistribution(CamelBase):
             ]
         }
     }
+    
+    def asDict(self):
+        return {"late": self.the_number_of_late, "on_time": self.the_number_of_on_time, "early": self.the_number_of_early}
