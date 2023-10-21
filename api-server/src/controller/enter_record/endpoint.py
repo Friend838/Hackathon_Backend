@@ -1,10 +1,13 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Query
 
 # pylint: disable=import-error
 from src.controller.enter_record.schema.post_enter_record import (
     PostEnterRecordRequestBody,
     PostEnterRecordResponseBody,
 )
+from src.controller.enter_record.schema.query_enter_record import QueryEnterRecord
 from src.service.enter_record_service import EnterRecordService
 
 service = EnterRecordService()
@@ -23,3 +26,14 @@ def generate_enter_record(
     body: PostEnterRecordRequestBody,
 ):
     return service.process_enter_record(body)
+
+
+@enter_record_router.get(
+    path="/",
+    response_model=QueryEnterRecord,
+)
+def get_enter_record(
+    start_timestamp: Annotated[int, Query(example=0)],
+    end_timestamp: Annotated[int, Query(example=0)],
+):
+    return service.query_enter_record(start_timestamp, end_timestamp)
