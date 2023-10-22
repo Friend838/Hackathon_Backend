@@ -16,7 +16,9 @@ from src.dependencies.settings import get_settings
 
 app = FastAPI()
 
-origins = ["http://localhost:3030", "http://127.0.0.1:3030"]
+origins = [
+    "*",
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,7 +26,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 app.include_router(employee_router)

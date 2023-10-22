@@ -15,7 +15,7 @@ service = Common()
 common_router = APIRouter(prefix="/common", tags=["common"])
 
 
-@common_router.post(path="/imageInference", response_class=FileResponse)
+@common_router.post(path="/imageInference")
 def inference_image(
     img_file: Annotated[UploadFile, File()],
 ):
@@ -32,8 +32,11 @@ def inference_image(
 
     processed_img_path, results = service.model_inference(file_path)
     results = {"results": json.dumps(dict_to_camel(results))}
+    processed_img_path = os.getcwd() + "/" + processed_img_path
 
-    return FileResponse(processed_img_path, headers=results, media_type="image/jpg")
+    # results = {"a": "b"}
+
+    return {"img_path": processed_img_path, "results": results}
 
 
 @common_router.post(
