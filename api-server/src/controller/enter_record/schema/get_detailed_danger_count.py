@@ -3,11 +3,11 @@ from camel_converter.pydantic_base import CamelBase
 
 
 class GetDetailedDangerCount(CamelBase):
-    electronic_device: int
-    laptop: int
-    scissor: int
-    knife: int
-    gun: int
+    electronic_device: int = 0
+    laptop: int = 0
+    scissor: int = 0
+    knife: int = 0
+    gun: int = 0
 
     model_config = {
         "json_schema_extra": {

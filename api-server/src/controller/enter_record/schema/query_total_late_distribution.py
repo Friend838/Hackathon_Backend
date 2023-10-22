@@ -4,9 +4,9 @@ from camel_converter.pydantic_base import CamelBase
 
 
 class QueryTotalLateDistribution(CamelBase):
-    the_number_of_late: int
-    the_number_of_on_time: int
-    the_number_of_early: int
+    the_number_of_late: int = 0
+    the_number_of_on_time: int = 0
+    the_number_of_early: int = 0
 
     model_config = {
         "json_schema_extra": {
@@ -21,6 +21,3 @@ class QueryTotalLateDistribution(CamelBase):
             ]
         }
     }
-    
-    def asDict(self):
-        return {"late": self.the_number_of_late, "on_time": self.the_number_of_on_time, "early": self.the_number_of_early}

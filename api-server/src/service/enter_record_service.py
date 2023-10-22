@@ -204,4 +204,6 @@ class EnterRecordService:
                 else:
                     count[label_mapping[label]] += 1
 
+        print(count)
+
         return GetDetailedDangerCount(**count)

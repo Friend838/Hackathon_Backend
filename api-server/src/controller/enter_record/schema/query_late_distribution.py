@@ -4,9 +4,9 @@ from camel_converter.pydantic_base import CamelBase
 
 class DepartmentLateDistribution(CamelBase):
     department: str
-    the_number_of_late: int
-    the_number_of_on_time: int
-    the_number_of_early: int
+    the_number_of_late: int = 0
+    the_number_of_on_time: int = 0
+    the_number_of_early: int = 0
 
     model_config = {
         "json_schema_extra": {
