@@ -29,7 +29,7 @@ class AnalysisServerService:
         self.userSchemaMsg = "Employee schema: " + Employee.brief()
         self.enterRecordSchemaMsg = "EnterRecord schema: " + EnterRecord.brief()
         self.machineRecordSchemaMsg = "MachineRecord Schema: " + MachineRecord.brief()
-        self.lateDefinitionMsg = "The definition of late is the employee's enterTime is greater than its shiftTime"
+        self.lateDefinitionMsg = "To know an employee is late or not, covert the date into hour and minute and compare it with the shift time, if the enter_time greater than shift_time, he is late."
         self.dataFunctionMsg = "Data function: AnalysisServerRepo().getData(collection, query), the function will find(query) in the db collection"
         self.codeExampleMsg = 'Code example: data = AnalysisServerRepo().getData("Employee", {"department": "HQ"}), X = len(data)'
         self.retQueryMsg = "Use the data function to answer the following question, and store the result in variable 'X'. Return python code only"
@@ -37,20 +37,27 @@ class AnalysisServerService:
         # 由 db 資料跟問句生成回答
         self.dataFoundMsg = "The finding data is: "
         self.codeQueryMsg = "The code to get the data is: "
-        self.dateDefinitionMsg = "If the answer is a date or a time, convert it from timestamp to the format MM/DD/YYYY hh:mm"
+        self.dateDefinitionMsg = "Don't return the timestamp, instead convert to format MM/DD/YYYY hh:mm. For example: convert 1694994480 to 09/18/2023 07:48"
         self.retUserMsg = (
             "Please use the finding data to answer the following question in "
         )
 
-        # 由 totalLateDistributed 資料生成觀察跟結論
-        self.reportQuestionMsg = "List 3 observation from the following data with explanation and comparison briefly. All in {0}"
+        # 由遲到分布資料生成觀察跟結論
+        self.reportQuestionMsg = "List 2 ~ 3 observation from the following data with explanation briefly (less than 300 words). All in {0}"
+        self.reportAttedencePrefixMsg = "The user is a HR in the company, who wants to know about the attendance of the employee."
         self.reportTotalLateDataMsg = "The data shows the distribution of late, on time and early employee from {0} to {1}"
         self.reportDeptLateDataMsg = "The data shows the distribution of late, on time and early employee of each department from {0} to {1}"
         self.reportAttedenceConclusionMsg = (
             "Draw a summary of the informations as the ending of the report. All in {0}"
         )
 
-        # 由 departmentLateDistributed 資料生成觀察跟結論
+        # 由掃描資料生成觀察跟結論
+        self.reportMachinePrefixMsg = "The data are from a security gate's tool scan machine, it check the employee bring some danger items into the workspace."
+        self.reportDangerLevelMsg = "The data shows the distribution of the normal, warning and danger status of employee's belongings from {0} to {1}"
+        self.reportDangerCountMsg = "The data shows the distribution of the identified contraband found in employee's belongings from {0} to {1}"
+        self.reportMachineConclusionMsg = (
+            "Draw a summary of the informations as the ending of the report. All in {0}"
+        )
 
     def gpt(self, messages):
         completion = openai.ChatCompletion.create(
@@ -144,7 +151,9 @@ class AnalysisServerService:
         for i in range((endTime - startTime) // day):
             s, e = startTime + day * i, startTime + day * (i + 1)
             totalLateDistribution.append(
-                ers.query_total_late_status(start_timestamp=s, end_timestamp=e).asDict()
+                ers.query_total_late_status(
+                    start_timestamp=s, end_timestamp=e
+                ).model_dump()
             )
             deptLateDistribution.append(
                 [
@@ -176,6 +185,7 @@ class AnalysisServerService:
             }
         )
         messages.append({"role": "system", "content": str(totalLateDistribution)})
+        messages.append({"role": "system", "content": self.reportAttedencePrefixMsg})
         messages.append(
             {"role": "user", "content": self.reportQuestionMsg.format(language)}
         )
@@ -192,6 +202,7 @@ class AnalysisServerService:
             }
         )
         messages.append({"role": "system", "content": str(deptLateDistribution)})
+        messages.append({"role": "system", "content": self.reportAttedencePrefixMsg})
         messages.append(
             {"role": "user", "content": self.reportQuestionMsg.format(language)}
         )
@@ -201,6 +212,7 @@ class AnalysisServerService:
 
     def attendanceConclusionMsg(self, contents, language):
         messages = []
+        messages.append({"role": "system", "content": self.reportAttedencePrefixMsg})
         for i in range(len(contents)):
             messages.append(
                 {
@@ -220,11 +232,99 @@ class AnalysisServerService:
         return ret
 
     def machine_report(self, startTime, endTime, language):
+        startTimeStr, endTimeStr = self.timestamp2str(startTime), self.timestamp2str(
+            endTime
+        )
         title = (
             "Machine Report: "
             + self.timestamp2str(startTime)
             + " ~ "
             + self.timestamp2str(endTime)
         )
-        content = []
-        return title, content
+
+        contents = []
+
+        ers = EnterRecordService()
+
+        dangerLevelDistribution = []
+        dangerCountDistribution = []
+        day = 86400
+        for i in range((endTime - startTime) // day):
+            s, e = startTime + day * i, startTime + day * (i + 1)
+            dangerLevelDistribution.append(
+                ers.get_danger_count(start_timestamp=s, end_timestamp=e).model_dump()
+            )
+            dangerCountDistribution.append(
+                ers.get_detailed_danger_count(
+                    start_timestamp=s, end_timestamp=e
+                ).model_dump()
+            )
+
+        contents.append(
+            self.dangerLevel2msg(
+                dangerLevelDistribution, startTimeStr, endTimeStr, language
+            )
+        )
+        contents.append(
+            self.dangerCount2msg(
+                dangerCountDistribution, startTimeStr, endTimeStr, language
+            )
+        )
+        contents.append(self.machineConclusionMsg(contents, language))
+
+        return title, contents
+
+    def dangerLevel2msg(self, dangerLevelDistribution, startTime, endTime, language):
+        messages = []
+        messages.append(
+            {
+                "role": "system",
+                "content": self.reportDangerLevelMsg.format(startTime, endTime),
+            }
+        )
+        messages.append({"role": "system", "content": str(dangerLevelDistribution)})
+        messages.append({"role": "system", "content": self.reportMachinePrefixMsg})
+        messages.append(
+            {"role": "user", "content": self.reportQuestionMsg.format(language)}
+        )
+
+        ret = self.gpt(messages)
+        return ret
+
+    def dangerCount2msg(self, dangerCountDistribution, startTime, endTime, language):
+        messages = []
+        messages.append(
+            {
+                "role": "system",
+                "content": self.reportDangerCountMsg.format(startTime, endTime),
+            }
+        )
+        messages.append({"role": "system", "content": str(dangerCountDistribution)})
+        messages.append({"role": "system", "content": self.reportMachinePrefixMsg})
+        messages.append(
+            {"role": "user", "content": self.reportQuestionMsg.format(language)}
+        )
+
+        ret = self.gpt(messages)
+        return ret
+
+    def machineConclusionMsg(self, contents, language):
+        messages = []
+        messages.append({"role": "system", "content": self.reportMachinePrefixMsg})
+        for i in range(len(contents)):
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": "Information from chart {}: ".format(i + 1)
+                    + contents[i],
+                }
+            )
+        messages.append(
+            {
+                "role": "user",
+                "content": self.reportMachineConclusionMsg.format(language),
+            }
+        )
+
+        ret = self.gpt(messages)
+        return ret
